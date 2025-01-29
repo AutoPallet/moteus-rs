@@ -5,13 +5,15 @@
 //!
 //! This module contains the register structs as well as trait interfaces and register types (such as [`Modes`] and [`HomeStates`]).
 
-use crate::{RegisterError, Resolution};
+use std::fmt::Debug;
+use std::marker::PhantomData;
+
 use byteorder::{ReadBytesExt, LE};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
-use std::fmt::Debug;
-use std::marker::PhantomData;
 use zerocopy::AsBytes;
+
+use crate::{RegisterError, Resolution};
 
 /// Used to define a register with Integers as the representation
 macro_rules! int_rw_register {
@@ -630,12 +632,15 @@ impl TryIntoBytes for () {
     fn try_into_1_byte(self, _scale: f32) -> Result<u8, RegisterError> {
         Ok(0)
     }
+
     fn try_into_2_bytes(self, _scale: f32) -> Result<[u8; 2], RegisterError> {
         Ok([0, 0])
     }
+
     fn try_into_4_bytes(self, _scale: f32) -> Result<[u8; 4], RegisterError> {
         Ok([0, 0, 0, 0])
     }
+
     fn try_into_f32_bytes(self) -> Result<[u8; 4], RegisterError> {
         Ok([0, 0, 0, 0])
     }
@@ -645,12 +650,15 @@ impl TryFromBytes for () {
     fn try_from_1_byte(_: u8, _scale: f32) -> Result<Self, RegisterError> {
         Ok(())
     }
+
     fn try_from_2_bytes(_: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         Ok(())
     }
+
     fn try_from_4_bytes(_: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         Ok(())
     }
+
     fn try_from_f32_bytes(_: &[u8]) -> Result<Self, RegisterError> {
         Ok(())
     }
@@ -660,12 +668,15 @@ impl TryIntoBytes for i8 {
     fn try_into_1_byte(self, _scale: f32) -> Result<u8, RegisterError> {
         Ok(self as u8)
     }
+
     fn try_into_2_bytes(self, _scale: f32) -> Result<[u8; 2], RegisterError> {
         Ok((self as i16).to_le_bytes())
     }
+
     fn try_into_4_bytes(self, _scale: f32) -> Result<[u8; 4], RegisterError> {
         Ok((self as i32).to_le_bytes())
     }
+
     fn try_into_f32_bytes(self) -> Result<[u8; 4], RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -675,14 +686,17 @@ impl TryFromBytes for i8 {
     fn try_from_1_byte(byte: u8, _scale: f32) -> Result<Self, RegisterError> {
         Ok(byte as i8)
     }
+
     fn try_from_2_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let value = i16::from_le_bytes([bytes[0], bytes[1]]);
         Ok(value as i8)
     }
+
     fn try_from_4_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let value = i32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
         Ok(value as i8)
     }
+
     fn try_from_f32_bytes(_: &[u8]) -> Result<Self, RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -696,6 +710,7 @@ impl TryIntoBytes for i32 {
         }
         Ok(value as u8)
     }
+
     fn try_into_2_bytes(self, _scale: f32) -> Result<[u8; 2], RegisterError> {
         let value = self;
         if value > i16::MAX as i32 || value < i16::MIN as i32 {
@@ -703,10 +718,12 @@ impl TryIntoBytes for i32 {
         }
         Ok((value as i16).to_le_bytes())
     }
+
     fn try_into_4_bytes(self, _scale: f32) -> Result<[u8; 4], RegisterError> {
         let value = self;
         Ok(value.to_le_bytes())
     }
+
     fn try_into_f32_bytes(self) -> Result<[u8; 4], RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -717,16 +734,19 @@ impl TryFromBytes for i32 {
         let value = byte as i32;
         Ok(value)
     }
+
     fn try_from_2_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let mut rdr = std::io::Cursor::new(bytes);
         let value = rdr.read_i16::<LE>()?;
         Ok(value as i32)
     }
+
     fn try_from_4_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let mut rdr = std::io::Cursor::new(bytes);
         let value = rdr.read_i32::<LE>()?;
         Ok(value)
     }
+
     fn try_from_f32_bytes(bytes: &[u8]) -> Result<Self, RegisterError> {
         let mut rdr = std::io::Cursor::new(bytes);
         let value = rdr.read_f32::<LE>()?;
@@ -742,6 +762,7 @@ impl TryIntoBytes for u32 {
         }
         Ok(value as u8)
     }
+
     fn try_into_2_bytes(self, _scale: f32) -> Result<[u8; 2], RegisterError> {
         let value = self;
         if value > i16::MAX as u32 || value < i16::MIN as u32 {
@@ -749,10 +770,12 @@ impl TryIntoBytes for u32 {
         }
         Ok((value as u16).to_le_bytes())
     }
+
     fn try_into_4_bytes(self, _scale: f32) -> Result<[u8; 4], RegisterError> {
         let value = self;
         Ok(value.to_le_bytes())
     }
+
     fn try_into_f32_bytes(self) -> Result<[u8; 4], RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -763,16 +786,19 @@ impl TryFromBytes for u32 {
         let value = byte as u32;
         Ok(value)
     }
+
     fn try_from_2_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let mut rdr = std::io::Cursor::new(bytes);
         let value = rdr.read_i16::<LE>()?;
         Ok(value as u32)
     }
+
     fn try_from_4_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let mut rdr = std::io::Cursor::new(bytes);
         let value = rdr.read_i32::<LE>()?;
         Ok(value as u32)
     }
+
     fn try_from_f32_bytes(_bytes: &[u8]) -> Result<Self, RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -790,6 +816,7 @@ impl TryIntoBytes for f32 {
         }
         Ok(value as u8)
     }
+
     fn try_into_2_bytes(self, scale: f32) -> Result<[u8; 2], RegisterError> {
         if !self.is_finite() {
             return Ok(i16::MIN.to_le_bytes());
@@ -800,6 +827,7 @@ impl TryIntoBytes for f32 {
         }
         Ok((value as i16).to_le_bytes())
     }
+
     fn try_into_4_bytes(self, scale: f32) -> Result<[u8; 4], RegisterError> {
         if !self.is_finite() {
             return Ok(i32::MIN.to_le_bytes());
@@ -810,6 +838,7 @@ impl TryIntoBytes for f32 {
         }
         Ok((value as i32).to_le_bytes())
     }
+
     fn try_into_f32_bytes(self) -> Result<[u8; 4], RegisterError> {
         let value = self;
         Ok(value.to_le_bytes())
@@ -829,6 +858,7 @@ impl TryFromBytes for f32 {
 
         Ok(value * scale)
     }
+
     fn try_from_2_bytes(bytes: &[u8], scale: f32) -> Result<Self, RegisterError> {
         let mut rdr = std::io::Cursor::new(bytes);
         let value = rdr.read_i16::<LE>()?;
@@ -841,6 +871,7 @@ impl TryFromBytes for f32 {
         };
         Ok(value * scale)
     }
+
     fn try_from_4_bytes(bytes: &[u8], scale: f32) -> Result<Self, RegisterError> {
         let mut rdr = std::io::Cursor::new(bytes);
         let value = rdr.read_i32::<LE>()?;
@@ -853,6 +884,7 @@ impl TryFromBytes for f32 {
         };
         Ok(value * scale)
     }
+
     fn try_from_f32_bytes(bytes: &[u8]) -> Result<Self, RegisterError> {
         let mut rdr = std::io::Cursor::new(bytes);
         let value = rdr.read_f32::<LE>()?;
@@ -905,6 +937,7 @@ impl TryIntoBytes for Modes {
     fn try_into_4_bytes(self, _scale: f32) -> Result<[u8; 4], RegisterError> {
         Ok((self as i32).to_le_bytes())
     }
+
     fn try_into_f32_bytes(self) -> Result<[u8; 4], RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -914,14 +947,17 @@ impl TryFromBytes for Modes {
     fn try_from_1_byte(byte: u8, _scale: f32) -> Result<Self, RegisterError> {
         Modes::from_u8(byte).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_2_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let value = u16::from_le_bytes([bytes[0], bytes[1]]);
         Modes::from_u16(value).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_4_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let value = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
         Modes::from_u32(value).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_f32_bytes(_bytes: &[u8]) -> Result<Self, RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -970,6 +1006,7 @@ impl TryIntoBytes for Faults {
     fn try_into_4_bytes(self, _scale: f32) -> Result<[u8; 4], RegisterError> {
         Ok((self as i32).to_le_bytes())
     }
+
     fn try_into_f32_bytes(self) -> Result<[u8; 4], RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -979,14 +1016,17 @@ impl TryFromBytes for Faults {
     fn try_from_1_byte(byte: u8, _scale: f32) -> Result<Self, RegisterError> {
         Faults::from_u8(byte).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_2_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let value = u16::from_le_bytes([bytes[0], bytes[1]]);
         Faults::from_u16(value).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_4_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let value = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
         Faults::from_u32(value).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_f32_bytes(_bytes: &[u8]) -> Result<Self, RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -1013,6 +1053,7 @@ impl TryIntoBytes for HomeStates {
     fn try_into_4_bytes(self, _scale: f32) -> Result<[u8; 4], RegisterError> {
         Ok((self as i32).to_le_bytes())
     }
+
     fn try_into_f32_bytes(self) -> Result<[u8; 4], RegisterError> {
         Err(RegisterError::IntAsFloat)
     }
@@ -1022,14 +1063,17 @@ impl TryFromBytes for HomeStates {
     fn try_from_1_byte(byte: u8, _scale: f32) -> Result<Self, RegisterError> {
         HomeStates::from_u8(byte).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_2_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let value = u16::from_le_bytes([bytes[0], bytes[1]]);
         HomeStates::from_u16(value).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_4_bytes(bytes: &[u8], _scale: f32) -> Result<Self, RegisterError> {
         let value = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
         HomeStates::from_u32(value).ok_or(RegisterError::InvalidData)
     }
+
     fn try_from_f32_bytes(_bytes: &[u8]) -> Result<Self, RegisterError> {
         Err(RegisterError::IntAsFloat)
     }

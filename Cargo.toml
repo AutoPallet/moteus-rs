@@ -8,8 +8,10 @@ repository = "https://github.com/omelia-iliffe/moteus-rs"
 description = "Rust library for interfacing with Moteus controllers"
 
 [dependencies]
+fdcanusb = { version = "0.6.3", optional = true, default-features = false, features = [
+    "serial2",
+] }
 hex = "0.4.3"
-fdcanusb = { version = "0.6.3", default-features = false, features = ["serial2"]}
 byteorder = "1.5.0"
 zerocopy = { version = "0.7.32", features = ["derive"] }
 num-traits = "0.2.18"
@@ -21,7 +23,18 @@ chrono = "0.4.35"
 thiserror = "1.0.63"
 
 [features]
-default = ["fdcanusb"]
+default = []
 fdcanusb = []
 log = ["fdcanusb/log"]
 aux_index_raw = []
+
+[lib]
+doctest = false
+
+[[example]]
+name = "simple"
+required-features = ["fdcanusb"]
+
+[[example]]
+name = "trajectory_test"
+required-features = ["fdcanusb"]

@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 
+use itertools::Itertools;
+use num_traits::FromPrimitive;
+
+use crate::bus::CanFdFrame;
 use crate::error::FrameError;
 use crate::protocol::registers::{FrameRegisters, RegisterData};
 use crate::registers::{Register, RegisterAddr, Res};
 use crate::{FrameParseError, Resolution};
-use fdcanusb::CanFdFrame;
-use itertools::Itertools;
-use num_traits::FromPrimitive;
 
 #[derive(Debug, PartialEq)]
 pub struct SubFrame {
@@ -174,7 +175,9 @@ pub struct Frame {
 }
 
 impl Frame {
-    pub(crate) fn as_bytes(&self) -> Result<Vec<u8>, FrameError> {
+    /// Convert the frame into a vector of bytes
+    /// NOTE(eric): This was previously pub(crate) but I needed it.
+    pub fn as_bytes(&self) -> Result<Vec<u8>, FrameError> {
         let mut buf = Vec::new();
         for subframe in &self.subframes {
             buf.extend(subframe.as_bytes()?);

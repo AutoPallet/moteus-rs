@@ -252,12 +252,15 @@ impl From<Query> for FrameBuilder {
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
+    use fdcanusb::{CanFdFrame, FdCanUSBFrame};
+
     use super::*;
-    use fdcanusb::{CanFdFrame, FdCanUSB, FdCanUSBFrame};
 
     /// Will fail unless a motor is connected with id 1.
+    #[cfg(fdcanusb)]
     #[test]
     fn test_query() {
+        use fdcanusb::FdCanUSB;
         let mut c = crate::Controller::new(
             FdCanUSB::open("/dev/fdcanusb", fdcanusb::serial2::KeepSettings)
                 .expect("Couldn't open fdcanusb at /dev/fdcanusb"),

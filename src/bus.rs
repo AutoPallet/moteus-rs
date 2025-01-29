@@ -2,7 +2,6 @@ use crate::error::Error;
 use crate::frame::QueryType;
 use crate::protocol::{Frame, FrameBuilder, ResponseFrame};
 use crate::FrameParseError;
-use fdcanusb::CanFdFrame;
 
 /// The main struct for interacting with the Moteus.
 pub struct Controller<T> {
@@ -60,6 +59,7 @@ where
             disable_brs,
         }
     }
+
     /// Creates a new [`Controller`] instance with a custom default query.
     ///
     /// ```rust
@@ -159,6 +159,7 @@ where
         self.transport.transmit(frame.into())?;
         Ok(())
     }
+
     fn transfer_single_with_response(
         &mut self,
         id: u8,
@@ -175,5 +176,22 @@ where
         self.transport.transmit(frame.into())?;
         let response = self.transport.receive()?;
         Ok(response.try_into()?)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CanFdFrame {
+    pub arbitration_id: u16,
+    pub data: Vec<u8>,
+    pub brs: Option<bool>,
+}
+
+impl Default for CanFdFrame {
+    fn default() -> Self {
+        Self {
+            arbitration_id: 0,
+            data: Vec::new(),
+            brs: None,
+        }
     }
 }
