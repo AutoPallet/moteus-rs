@@ -123,7 +123,8 @@ impl SubFrame {
 pub struct ResponseFrame(Vec<RegisterData>);
 
 impl ResponseFrame {
-    pub(crate) fn from_bytes(buf: &[u8]) -> Result<ResponseFrame, FrameParseError> {
+    /// Parse a response frame from a buffer of bytes
+    pub fn from_bytes(buf: &[u8]) -> Result<ResponseFrame, FrameParseError> {
         let mut results = Vec::new();
         let mut buf = buf;
         loop {

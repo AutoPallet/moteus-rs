@@ -252,7 +252,24 @@ impl RegisterData {
 impl Debug for RegisterData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(data) = &self.data {
-            write!(f, "{:?}{:?}", &self.address, &data)
+            // TODO(eric): Use the resolution value rather than assuming based
+            // on the length of the data.
+            match data.len() {
+                1 => write!(f, "{:?} {:?}", &self.address, &data[0]),
+                2 => write!(
+                    f,
+                    "{:?} {:?}",
+                    &self.address,
+                    i16::from_le_bytes([data[0], data[1]])
+                ),
+                4 => write!(
+                    f,
+                    "{:?} {:.3}",
+                    &self.address,
+                    f32::from_le_bytes([data[0], data[1], data[2], data[3]])
+                ),
+                _ => write!(f, "{:?}{:?}", &self.address, &data),
+            }
         } else {
             write!(f, "{:?}", &self.address)
         }
